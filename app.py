@@ -45,7 +45,7 @@ def main(random_state):
     ])
     regressor = pipe.fit(X_train, y_train)
 
-    # evaluate our model
+    # evaluates our model
     logger.info(f"regressor R^2 score {regressor.score(X_test, y_test)}")
 
 
