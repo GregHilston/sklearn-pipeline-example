@@ -43,8 +43,10 @@ def main(random_state):
     X_test = scaler.transform(X_test[numeric_columns])
 
     # trains our model
-    regressor = DecisionTreeRegressor(random_state=random_state)
-    logger.info(f"cross validation scores {cross_val_score(regressor, X, y, cv=10)}")
+    regressor = DecisionTreeRegressor(random_state=random_state).fit(X_train, y_train)
+
+    # evaluate our model
+    logger.info(f"regressor R^2 score {regressor.score(X_test, y_test)}")
 
 
 if __name__ == "__main__":
