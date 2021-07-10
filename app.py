@@ -7,6 +7,7 @@ from sklearn.datasets import load_boston
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.pipeline import Pipeline
 
 
 logging.basicConfig()
@@ -37,16 +38,14 @@ def main(random_state):
     categorical_columns = ["CHAS"]
     numeric_columns = [column for column in list(X) if column not in categorical_columns]
 
-    # scales our data by only fitting on our training but scaling both training and testing
-    # this avoids data leakage from our test set
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train[numeric_columns])
-    X_test = scaler.transform(X_test[numeric_columns])
-
     # trains our model
-    regressor = DecisionTreeRegressor(random_state=random_state).fit(X_train, y_train)
+    pipe = Pipeline([
+        ("scaler", StandardScaler(numeric_columns)),
+        ("decision tree regressor", DecisionTreeRegressor(random_state=random_state))
+    ])
+    regressor = pipe.fit(X_train, y_train)
 
-    # evaluate our model
+    # evaluates our model
     logger.info(f"regressor R^2 score {regressor.score(X_test, y_test)}")
 
 
