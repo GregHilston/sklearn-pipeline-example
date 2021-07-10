@@ -4,12 +4,13 @@ import typing
 import pandas as pd
 import sklearn
 from sklearn.datasets import load_boston
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.tree import DecisionTreeRegressor
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 random_state = 42
 
@@ -38,12 +39,12 @@ def main(random_state):
     # scales our data by only fitting on our training but scaling both training and testing
     # this avoids data leakage from our test set
     scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train[X_train[numeric_columns]])
-    X_test = scaler.transform(X_test)
+    X_train = scaler.fit_transform(X_train[numeric_columns])
+    X_test = scaler.transform(X_test[numeric_columns])
 
     # trains our model
-    reg = LinearRegression().fit(X, y)
-    print(reg)
+    regressor = DecisionTreeRegressor(random_state=random_state)
+    logger.info(f"cross validation scores {cross_val_score(regressor, X, y, cv=10)}")
 
 
 if __name__ == "__main__":
