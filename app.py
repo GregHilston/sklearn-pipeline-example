@@ -4,7 +4,7 @@ import typing
 import pandas as pd
 import sklearn
 from sklearn.datasets import load_boston
-from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
 
