@@ -33,24 +33,32 @@ def main(random_state):
     # and then tag on different Model steps later, reusing the original feature_pipe object.
     feature_pipe = make_pipeline(
         StandardScaler(numeric_columns),
+        # Foo()
+        # can add more
     )
+    feature_pipe.fit(X_train, y_train)
+    train_pipe = feature_pipe.transform(X_train)
 
-    model_pipe = make_pipeline(
-        DecisionTreeRegressor(random_state=random_state)
-    )
+    # could uncomment below
+    # and use train_pipe along with test_pipe to perform custom
+    # cross validation. This works, because feature_pipe was fitted ONLY on trained data
+    # and test_pipe will ensure our test data is processed using only things learned
+    # by training data
+    # test_pipe = feature_pipe.transform(X_test)
+
+    # This fits the `pipe` object, in place, allowing me to pickle/dill the `pipe` object for inference.
+    # trains our model
+    regressor = DecisionTreeRegressor(random_state=random_state)
+    regressor.fit(train_pipe, y_train)
 
     pipe = make_pipeline(
         feature_pipe,
-        model_pipe
+        regressor
     )
 
     # When we call `.fit()` on the Pipeline, we call `.fit()` on EVERY step in the pipeline, sequentially.
     # When we call `.predict()`, on the Pipeline, we call `.transform` on EVERY step in the pipeline, sequentially, except the last one if the last step extends a Model.
     # If you have another model, in the middle, this will break the pipeline unless we modify the Sklearn Pipeline code.
-
-    # This fits the `pipe` object, in place, allowing me to pickle/dill the `pipe` object for inference.
-    # trains our model
-    pipe.fit(X_train, y_train)
 
     # write out our fitted pipe to disk
     pickle.dump(pipe, open("pipe.pk", "wb"))
