@@ -1,13 +1,14 @@
 import logging
-import typing
 
-import pandas as pd
+import pickle
 import sklearn
 from sklearn.datasets import load_boston
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import make_pipeline
+
+from my_sklearn.my_sklearn import sklearn_to_df
 
 
 logging.basicConfig()
@@ -15,16 +16,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 random_state = 42
-
-
-def sklearn_to_df(sklearn_dataset: sklearn.utils.Bunch) -> typing.Tuple[pd.DataFrame, pd.Series]:
-    """Converts an sklearn premade dataset into a Pandas DataFrame
-
-    based on: https://stackoverflow.com/a/46379878/1983957
-    """
-    df = pd.DataFrame(sklearn_dataset.data, columns=sklearn_dataset.feature_names)
-    target = pd.Series(sklearn_dataset.target)
-    return df, target
 
 
 def main(random_state):
@@ -40,18 +31,18 @@ def main(random_state):
 
     # We separate out our feature engineering Pipeline from our model Pipeline because we can fit the feature engineering Pipeline now
     # and then tag on different Model steps later, reusing the original feature_pipe object.
-    feature_pipe = Pipeline([
-        ("scaler", StandardScaler(numeric_columns)),
-    ])
+    feature_pipe = make_pipeline(
+        StandardScaler(numeric_columns),
+    )
 
-    model_pipe = Pipeline([
-        ("decision tree regressor", DecisionTreeRegressor(random_state=random_state))
-    ])
+    model_pipe = make_pipeline(
+        DecisionTreeRegressor(random_state=random_state)
+    )
 
-    pipe = Pipeline([
+    pipe = make_pipeline(
         feature_pipe,
         model_pipe
-    ])
+    )
 
     # When we call `.fit()` on the Pipeline, we call `.fit()` on EVERY step in the pipeline, sequentially.
     # When we call `.predict()`, on the Pipeline, we call `.transform` on EVERY step in the pipeline, sequentially, except the last one if the last step extends a Model.
@@ -61,8 +52,8 @@ def main(random_state):
     # trains our model
     pipe.fit(X_train, y_train)
 
-    # evaluates our model
-    logger.info(f"regressor R^2 score {pipe.score(X_test, y_test)}")
+    # write out our fitted pipe to disk
+    pickle.dump(pipe, open("pipe.pk", "wb"))
 
 
 if __name__ == "__main__":

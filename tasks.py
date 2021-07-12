@@ -2,7 +2,7 @@
 from invoke import task
 
 
-ENTRYPOINT_PATH = "app.py"
+ENTRYPOINT_PATH = "train.py"
 
 
 @task
